@@ -3,10 +3,9 @@ require_relative 'navpoint'
 module Epub
   class Toc
 
-    def initialize(tocfile, reader)
+    def initialize(tocfile, read_file)
       @tocfile = tocfile
-      @reader  = reader
-      @file    = @reader.file
+      @read_file = read_file
       @content = get_toc_content
       @xml     = Nokogiri::XML(@content).remove_namespaces!
     end
@@ -26,7 +25,7 @@ module Epub
     def nav_points
       points = @xml.css("ncx > navMap > navPoint")
       points.map do |point|
-        Navpoint.new(point)
+        Navpoint.new(point, @read_file)
       end
     end
 
@@ -34,17 +33,18 @@ module Epub
       points = @xml.css("ncx > navMap > navPoint")
       if ncx? && has_toc? && points.size > 1
         points.map do |point|
-
           title = point.css('navLabel > text').first.text
-          file_path  = @reader.package.relative_content_path + point.css('content').attr('src').to_s
-          Page.new(title, file_path, @reader.file)
+          source = point.css('content').attr('src').to_s
+          file_path, anchor = source.split("#")
+          Page.new(title, file_path, anchor, @read_file)
         end
       else
         items  = @reader.package.reading_order
         items.map do |item|
           title = ""
-          file_path  = @reader.package.relative_content_path + item.attr('href').to_s
-          Page.new(title, file_path, @reader.file)
+          href = item.attr('href').to_s
+          file_path, anchor = href.split("#")
+          Page.new(title, file_path, anchor, @read_file)
         end
       end
     end
@@ -60,11 +60,7 @@ module Epub
     end
 
     def get_toc_content
-      begin
-        @reader.file.get_input_stream(@tocfile).read
-      rescue
-        ""
-      end
+      @read_file.(@tocfile)
     end
 
     # TODO: Add Stylesheets

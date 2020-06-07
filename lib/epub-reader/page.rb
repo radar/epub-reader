@@ -1,10 +1,11 @@
 module Epub
   class Page
-    attr_reader :title, :path, :anchor, :file
-    def initialize(title, path, file)
+    attr_reader :title, :path, :anchor
+    def initialize(title, path, anchor, read_file)
       @title = title
-      @path, @anchor = path.split("#")
-      @file  = file
+      @path = path
+      @anchor = anchor
+      @read_file = read_file
     end
 
     attr_reader :title, :path
@@ -16,10 +17,10 @@ module Epub
     private
 
     def get_page_content
-      file_contents = @file.get_input_stream(@path).read
-      return file_contents unless anchor
+      contents = @read_file.(path, relative: true)
+      return contents unless anchor
 
-      html = Nokogiri::HTML.parse(file_contents)
+      html = Nokogiri::HTML.parse(contents)
 
       html.css("##{anchor}").to_s
     end

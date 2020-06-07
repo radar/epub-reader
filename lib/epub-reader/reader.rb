@@ -55,7 +55,7 @@ module Epub
     end
 
     def toc
-      @toc ||= Toc.new(package.toc, self)
+      @toc ||= Toc.new(package.toc, method(:read_file))
     end
 
     def pages
@@ -69,6 +69,16 @@ module Epub
     def cover
       @cover ||= package.cover
     end
+
+    def path_for(path)
+      (package.relative_content_path + path)
+    end
+
+    def read_file(path, relative: false)
+      path = path_for(path) if relative
+      file.get_input_stream(path).read
+    end
+
 
     # TODO: To parse other META-INF files
     # signatures.xml [optional]
