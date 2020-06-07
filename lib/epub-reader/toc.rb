@@ -1,3 +1,5 @@
+require_relative 'navpoint'
+
 module Epub
   class Toc
 
@@ -20,17 +22,25 @@ module Epub
         @content
       end
     end
-    
+
+    def nav_points
+      points = @xml.css("ncx > navMap > navPoint")
+      points.map do |point|
+        Navpoint.new(point)
+      end
+    end
+
     def pages
-      points = @xml.css("ncx navMap navPoint")
-      items  = @reader.package.reading_order
+      points = @xml.css("ncx > navMap > navPoint")
       if ncx? && has_toc? && points.size > 1
         points.map do |point|
+
           title = point.css('navLabel > text').first.text
           file_path  = @reader.package.relative_content_path + point.css('content').attr('src').to_s
           Page.new(title, file_path, @reader.file)
         end
       else
+        items  = @reader.package.reading_order
         items.map do |item|
           title = ""
           file_path  = @reader.package.relative_content_path + item.attr('href').to_s
@@ -38,9 +48,9 @@ module Epub
         end
       end
     end
-    
+
     private
-      
+
     def ncx?
       @tocfile.match(/(\.ncx)$/)
     end
@@ -102,7 +112,7 @@ EOF
 EOF
       @reader.package.reading_order.each do |item|
         link = item.attr('href').to_s
-        html += "<li id=\"#{item.attr('id').to_s}\"><a href=\"#{link}\">#{link[0,link.rindex('.')]}</a></li>"        
+        html += "<li id=\"#{item.attr('id').to_s}\"><a href=\"#{link}\">#{link[0,link.rindex('.')]}</a></li>"
       end
       html += <<EOF
         </ol>
@@ -117,7 +127,7 @@ EOF
     def title
       root.css('docTitle > text').text
     end
-    
+
     def root
       @xml.css('ncx')
     end

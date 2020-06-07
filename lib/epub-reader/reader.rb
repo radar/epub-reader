@@ -5,14 +5,14 @@ module Epub
     PACKAGE_MEDIATYPE = "application/oebps-package+xml"
 
     attr_reader :filepath, :file
-    
+
     def initialize(f)
       raise(FileNotFoundError, "File not found") unless File.exists?(f)
       @filepath  = f.to_s
       @file      = EpubFile.new(f)
       raise(MalformedFileError, "Invalid EPUB file format") unless valid?
     end
-    
+
     def Reader.open(f)
       reader = Reader.new(f)
       if block_given?
@@ -61,7 +61,7 @@ module Epub
     def pages
       @pages ||= toc.pages
     end
-    
+
     def container
       @container ||= Container.new(self)
     end
@@ -84,7 +84,7 @@ module Epub
     # Used to store information about digital rights.
 
     # manifest.xml [allowed]
-    # A manifest of container contents as allowed by Open Document Format [ODF]. 
+    # A manifest of container contents as allowed by Open Document Format [ODF].
 
     # Convenient method
     def package(index = 0)
