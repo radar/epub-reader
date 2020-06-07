@@ -1,4 +1,4 @@
-require 'zip/zipfilesystem'
+require 'zip'
 require 'nokogiri'
 require "epub-reader/version"
 require "epub-reader/reader"

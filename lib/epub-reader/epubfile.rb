@@ -1,5 +1,5 @@
 module Epub
-  class EpubFile < Zip::ZipFile
+  class EpubFile < Zip::File
     def initialize(f)
       super
     end
